@@ -8,7 +8,6 @@
         :root {
             --bg-color: #0f0f13; --card-bg: #1c1c24; --text-main: #ffffff; --text-muted: #8e8e93;
             --accent-blue: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
-            --accent-pink: linear-gradient(135deg, #ff0844 0%, #ffb199 100%);
         }
         * { box-sizing: border-box; }
         body { font-family: sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px 15px; display: flex; flex-direction: column; align-items: center; }
@@ -22,7 +21,6 @@
         .count-val { font-size: 22px; font-weight: bold; width: 30px; text-align: center; }
         .btn { width: 100%; padding: 16px; border-radius: 14px; border: none; font-size: 16px; font-weight: 700; color: white; cursor: pointer; text-transform: uppercase; }
         .btn-base { background: var(--accent-blue); }
-        .btn-vip { background: var(--accent-pink); }
     </style>
 </head>
 <body>
@@ -34,35 +32,22 @@
         </div>
         <p class="desc">Доступ до всіх зон фестивалю.</p>
         <div class="counter">
-            <button class="count-btn" onclick="change(1, -1)">-</button>
-            <span class="count-val" id="cnt1">1</span>
-            <button class="count-btn" onclick="change(1, 1)">+</button>
+            <button class="count-btn" onclick="change(-1)">-</button>
+            <span class="count-val" id="cnt">1</span>
+            <button class="count-btn" onclick="change(1)">+</button>
         </div>
-        <button class="btn btn-base" onclick="send(1, 'Класичний')">Купити</button>
-    </div>
-
-    <div class="ticket-card">
-        <div style="display:flex; justify-content: space-between; align-items:center;">
-            <h3>Виступаючий</h3><div class="price">250 ₴</div>
-        </div>
-        <p class="desc">Для учасників турнірів та косплею.</p>
-        <div class="counter">
-            <button class="count-btn" onclick="change(2, -1)">-</button>
-            <span class="count-val" id="cnt2">1</span>
-            <button class="count-btn" onclick="change(2, 1)">+</button>
-        </div>
-        <button class="btn btn-vip" onclick="send(2, 'Для виступаючих')">Купити</button>
+        <button class="btn btn-base" onclick="send('Класичний')">Купити</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
-        let counts = { 1: 1, 2: 1 };
-        function change(id, delta) {
-            counts[id] = Math.max(1, Math.min(10, counts[id] + delta));
-            document.getElementById('cnt' + id).innerText = counts[id];
+        let count = 1;
+        function change(delta) {
+            count = Math.max(1, Math.min(10, count + delta));
+            document.getElementById('cnt').innerText = count;
         }
-        function send(id, name) {
-            tg.sendData(JSON.stringify({ ticket: name, count: counts[id] }));
+        function send(name) {
+            tg.sendData(JSON.stringify({ ticket: name, count: count }));
             tg.close();
         }
     </script>
