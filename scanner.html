@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { background-color: #0f0f13; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .btn { background: linear-gradient(135deg, #00ff87 0%, #60efff 100%); color: #000; font-weight: bold; border: none; padding: 20px 40px; border-radius: 15px; font-size: 18px; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 15px rgba(0,255,135,0.3); }
+    </style>
+</head>
+<body>
+    <h2>📷 Сканер Dristic-con</h2>
+    <button class="btn" onclick="scan()">Сканувати QR</button>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        function scan() {
+            tg.showScanQrPopup({ text: "Наведіть камеру на квиток Dristic-con" }, function(data) {
+                if (data) {
+                    tg.sendData("SCAN:" + data);
+                    tg.closeScanQrPopup();
+                    tg.close();
+                }
+                return true;
+            });
+        }
+    </script>
+</body>
+</html>
