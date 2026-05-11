@@ -3,13 +3,12 @@ const QRCode = require('qrcode');
 const fs = require('fs');
 const path = require('path');
 
-// Беремо токен з Railway, не палимо в коді!
 const bot = new Telegraf(process.env.BOT_TOKEN); 
-const ADMIN_IDS = ['789355423', 'ТУТ_ID_ХИРОШИ', 'ТУТ_ID_РИСА']; 
+const ADMIN_IDS = ['789355423', 'ТУТ_ID_ХИРОШИ', 'ТУТ_ID_РИСА']; // Впиши реальні айдішники
 
-// Заміни на посилання нового репо для Dristic-con
-const APP_URL = 'https://zhutler.github.io/Dristic-tickets/app.html';
-const SCANNER_URL = 'https://zhutler.github.io/dristic-tickets/scanner.html';
+// Змінив v=1 на v=2 для скидання кешу вітрини
+const APP_URL = 'https://zhutler.github.io/dristic-tickets/app.html?v=2';
+const SCANNER_URL = 'https://zhutler.github.io/dristic-tickets/scanner.html?v=1';
 
 const dbPath = '/data/tickets.json';
 const reqDbPath = '/data/requests.json';
@@ -69,8 +68,8 @@ bot.on('message', async (ctx, next) => {
             const data = JSON.parse(rawData);
             const userId = ctx.from.id;
             
-            // Якщо ціни для Dristic-con інші, зміни цифри тут
-            const price = data.ticket === 'Класичний' ? 300 : 250;
+            // Фіксована ціна, бо тип квитка лише один
+            const price = 300;
             const totalSum = data.count * price;
             
             const reqDb = loadReqDB();
@@ -182,7 +181,7 @@ bot.action(/reject_(.+)/, async (ctx) => {
 });
 
 bot.launch();
-console.log('Бот Dristic-con: запущено!');
+console.log('Бот Dristic-con: запущено з одним типом квитків!');
 
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
