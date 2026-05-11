@@ -1,0 +1,12 @@
+{
+  "name": "dristic-tickets",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "telegraf": "^4.16.0",
+    "qrcode": "^1.5.0"
+  }
+}
