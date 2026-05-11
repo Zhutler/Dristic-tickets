@@ -7,7 +7,7 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 const ADMIN_IDS = ['789355423', '7153484442', 'ТУТ_ID_РИСА']; // Впиши реальні айдішники
 
 // Змінив v=1 на v=2 для скидання кешу вітрини
-const APP_URL = 'https://zhutler.github.io/dristic-tickets/app.html?v=2';
+const APP_URL = 'https://zhutler.github.io/Dristic-tickets/app.html?v=2';
 const SCANNER_URL = 'https://zhutler.github.io/Dristic-tickets/scanner.html?v=1';
 
 const dbPath = '/data/tickets.json';
