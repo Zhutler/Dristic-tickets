@@ -8,8 +8,8 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 const ADMIN_IDS = ['789355423', 'ТУТ_ID_ХИРОШИ', 'ТУТ_ID_РИСА']; 
 
 // Заміни на посилання нового репо для Dristic-con
-const APP_URL = 'https://zhutler.github.io/dristic-tickets/app.html?v=1';
-const SCANNER_URL = 'https://zhutler.github.io/dristic-tickets/scanner.html?v=1';
+const APP_URL = 'https://zhutler.github.io/Dristic-tickets/app.html';
+const SCANNER_URL = 'https://zhutler.github.io/dristic-tickets/scanner.html';
 
 const dbPath = '/data/tickets.json';
 const reqDbPath = '/data/requests.json';
