@@ -76,7 +76,7 @@ bot.on('message', async (ctx, next) => {
             reqDb[`draft_${userId}`] = { ticketType: data.ticket, count: data.count };
             saveReqDB(reqDb);
             
-            return ctx.reply(`Обрано: ${data.ticket} - ${data.count} шт.\n\nСума: ${totalSum} ₴\nКартка: 💳 4149 6090 6948 0624\n\nКидай скрін чека!`);
+            return ctx.reply(`Обрано: ${data.ticket} - ${data.count} шт.\n\nСума: ${totalSum} ₴\nКартка: 💳 4441 1110 6816 3314\n\nКидай скрін чека!`);
         } catch (e) {
             return ctx.reply('Помилка даних. Спробуй ще раз.');
         }
