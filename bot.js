@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const bot = new Telegraf(process.env.BOT_TOKEN); 
-const ADMIN_IDS = ['789355423', '7153484442', '505311483', '789355423', '723005270']; // Впиши реальні айдішники
+const ADMIN_IDS = ['789355423', '7153484442', '505311483', '923046308', '723005270']; // Впиши реальні айдішники
 
 // Змінив v=1 на v=2 для скидання кешу вітрини
 const APP_URL = 'https://zhutler.github.io/Dristic-tickets/app.html?v=2';
