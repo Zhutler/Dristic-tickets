@@ -3,65 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dristic-con — квитки</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,500;0,700;1,800;1,900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0f0f13; --card-bg: #1c1c24; --text-main: #ffffff; --text-muted: #8e8e93;
-            --accent-blue: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
-            --accent-purple: linear-gradient(135deg, #7f00ff 0%, #e100ff 100%);
+            --void: #040706;
+            --lime: #c6f500;
+            --lime-deep: #5fae00;
+            --blue: #1f4fd8;
+            --blue-deep: #0b2a8f;
+            --chrome-hi: #f4f7f6;
+            --chrome-lo: #6b7470;
+            --text: #eef6ea;
+            --muted: #9db3a2;
+            --lcd-bg: #07120a;
+            --lcd-on: #9dff3c;
         }
-        * { box-sizing: border-box; }
-        body { font-family: sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px 15px; display: flex; flex-direction: column; align-items: center; }
-        .header { text-align: center; margin-bottom: 20px; }
-        .header h1 { font-size: 28px; margin: 0; background: linear-gradient(45deg, #00ff87, #60efff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .ticket-card { background-color: var(--card-bg); border-radius: 20px; padding: 20px; width: 100%; max-width: 350px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.05); }
-        .price { font-size: 20px; font-weight: 800; }
-        .desc { color: var(--text-muted); font-size: 14px; margin: 10px 0; }
-        .counter { display: flex; align-items: center; justify-content: center; margin: 15px 0; gap: 20px; }
-        .count-btn { background: #333; border: none; color: white; width: 40px; height: 40px; border-radius: 10px; font-size: 20px; cursor: pointer; }
-        .count-val { font-size: 22px; font-weight: bold; width: 30px; text-align: center; }
-        .btn { width: 100%; padding: 16px; border-radius: 14px; border: none; font-size: 16px; font-weight: 700; color: white; cursor: pointer; text-transform: uppercase; }
-        .btn-base { background: var(--accent-blue); }
-        .btn-vip { background: var(--accent-purple); }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { margin: 0; min-height: 100%; }
+        body {
+            font-family: 'Exo 2', system-ui, sans-serif;
+            color: var(--text);
+            background-color: var(--void);
+            background-image:
+                radial-gradient(120% 60% at 85% -5%, rgba(140, 255, 40, .30), transparent 60%),
+                radial-gradient(90% 55% at -10% 35%, rgba(31, 79, 216, .35), transparent 65%),
+                radial-gradient(80% 50% at 110% 85%, rgba(60, 200, 30, .22), transparent 60%),
+                linear-gradient(180deg, #050a07 0%, #020403 100%);
+            background-attachment: fixed;
+            overflow-x: hidden;
+        }
+
+        /* Шестикутна сітка + хромові «стрічки» на фоні */
+        .backdrop { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+        .backdrop::before {
+            content: ''; position: absolute; inset: 0; opacity: .16;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='48.5' viewBox='0 0 28 48.5'%3E%3Cpath d='M14 0 L28 8.08 L28 24.25 L14 32.33 L0 24.25 L0 8.08 Z M14 32.33 L14 48.5' fill='none' stroke='%239dff3c' stroke-width='.6'/%3E%3C/svg%3E");
+            -webkit-mask-image: radial-gradient(70% 55% at 50% 30%, #000 20%, transparent 80%);
+                    mask-image: radial-gradient(70% 55% at 50% 30%, #000 20%, transparent 80%);
+        }
+        .ribbon {
+            position: absolute; border-radius: 50%;
+            border: 10px solid transparent;
+            border-top-color: rgba(198, 245, 0, .55);
+            border-left-color: rgba(220, 255, 200, .18);
+            filter: blur(1.5px) drop-shadow(0 0 18px rgba(157, 255, 60, .55));
+        }
+        .ribbon.r1 { width: 520px; height: 300px; top: -90px; right: -260px; transform: rotate(-24deg); }
+        .ribbon.r2 { width: 640px; height: 360px; bottom: -220px; left: -330px; transform: rotate(18deg);
+            border-top-color: rgba(70, 120, 255, .55); border-left-color: rgba(200, 220, 255, .14);
+            filter: blur(2px) drop-shadow(0 0 22px rgba(31, 79, 216, .7)); }
+
+        .bubble { position: absolute; will-change: transform; animation: bob 7s ease-in-out infinite; }
+        .bubble.far { filter: blur(1.5px); opacity: .55; }
+        @keyframes bob {
+            0%, 100% { transform: translateY(0) rotate(-4deg); }
+            50% { transform: translateY(-14px) rotate(4deg); }
+        }
+
+        main { position: relative; z-index: 1; max-width: 400px; margin: 0 auto; padding: 14px 16px 28px; }
+
+        .logo {
+            display: block; width: 86%; max-width: 330px; margin: 4px auto 0;
+            filter: drop-shadow(0 0 22px rgba(157, 255, 60, .35)) drop-shadow(0 10px 18px rgba(0, 0, 0, .6));
+            animation: logoIn .7s cubic-bezier(.2, 1.4, .4, 1) both;
+        }
+        @keyframes logoIn { from { opacity: 0; transform: scale(.85) rotate(-3deg); } }
+
+        /* LCD-рядок у стилі старих плеєрів */
+        .lcd {
+            margin: 14px auto 22px; padding: 8px 14px; width: fit-content; max-width: 100%;
+            border-radius: 10px; background: var(--lcd-bg);
+            border: 1px solid #1d2b21;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, .8), 0 1px 0 rgba(255, 255, 255, .08), 0 0 0 3px #111813, 0 0 0 4px #39443d;
+            font: 700 13px/1 'Exo 2', monospace; letter-spacing: .28em; text-transform: uppercase;
+            color: var(--lcd-on); text-shadow: 0 0 6px rgba(157, 255, 60, .8);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .lcd .eq { display: flex; gap: 2px; align-items: flex-end; height: 12px; }
+        .lcd .eq i { width: 3px; background: var(--lcd-on); box-shadow: 0 0 4px var(--lcd-on); animation: eq 1.1s ease-in-out infinite; }
+        .lcd .eq i:nth-child(2) { animation-delay: -.3s; } .lcd .eq i:nth-child(3) { animation-delay: -.6s; } .lcd .eq i:nth-child(4) { animation-delay: -.85s; }
+        @keyframes eq { 0%, 100% { height: 3px; } 50% { height: 12px; } }
+
+        #test-banner {
+            display: none; margin: -8px auto 18px; padding: 9px 14px; border-radius: 10px; text-align: center;
+            background: #1a1300; color: #ffcf3a; font-weight: 700; font-size: 13px; letter-spacing: .06em;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, .8), 0 0 0 2px #4a3a00; text-shadow: 0 0 6px rgba(255, 200, 40, .7);
+        }
+
+        /* Скляна панель із хромовою рамкою */
+        .card {
+            position: relative; margin-bottom: 22px; padding: 2px; border-radius: 26px;
+            background: linear-gradient(160deg, var(--chrome-hi) 0%, var(--chrome-lo) 28%, #1b221e 55%, #a9b3ae 85%, #3a423e 100%);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, .65), 0 0 30px rgba(157, 255, 60, .08);
+            animation: cardIn .6s ease-out both;
+        }
+        .card:first-of-type { margin-top: 62px; }
+        .card:nth-of-type(2) { animation-delay: .08s; }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(18px); } }
+        .card-in {
+            position: relative; overflow: hidden; border-radius: 24px; padding: 20px 18px 18px;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, .13) 0%, rgba(255, 255, 255, .03) 42%, rgba(0, 0, 0, 0) 43%),
+                radial-gradient(120% 90% at 100% 0%, var(--glow, rgba(157, 255, 60, .22)), transparent 60%),
+                linear-gradient(180deg, #121a15 0%, #070b09 100%);
+        }
+        .card.vip { --glow: rgba(60, 110, 255, .35); }
+        .card.vip .card-in { padding-top: 20px; }
+
+        .mascot {
+            position: absolute; z-index: 3; width: 112px; right: -8px; top: -74px; pointer-events: none;
+            filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .6));
+            animation: bob 5s ease-in-out infinite;
+        }
+
+        .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        h2 {
+            margin: 0; font-weight: 900; font-style: italic; font-size: 25px; letter-spacing: .01em; text-transform: uppercase;
+            background: linear-gradient(180deg, #ffffff 0%, #dfe7e2 45%, #8e9a93 52%, #f2f6f4 100%);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+            filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .7));
+        }
+        .tag { margin-top: 4px; font-size: 13px; color: var(--muted); }
+
+        .price {
+            flex-shrink: 0; padding: 7px 11px; border-radius: 9px; background: var(--lcd-bg);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, .9), 0 0 0 1px #2b3a2f, 0 1px 0 rgba(255, 255, 255, .1);
+            font-weight: 800; font-size: 22px; font-style: italic; color: var(--lcd-on);
+            text-shadow: 0 0 8px rgba(157, 255, 60, .85); font-variant-numeric: tabular-nums;
+        }
+        .vip .price { color: #8fb4ff; text-shadow: 0 0 8px rgba(80, 140, 255, .9); }
+
+        .counter { display: flex; align-items: center; justify-content: center; gap: 22px; margin: 18px 0 16px; }
+        .orb {
+            width: 46px; height: 46px; border-radius: 50%; border: none; cursor: pointer;
+            font: 900 24px/1 'Exo 2', sans-serif; color: #1b211e;
+            background: radial-gradient(circle at 50% 28%, #ffffff 0%, #dfe5e2 30%, #8a948f 70%, #c9d0cc 100%);
+            box-shadow: inset 0 -3px 6px rgba(0, 0, 0, .35), 0 4px 10px rgba(0, 0, 0, .6), 0 0 0 2px #2a312d;
+            transition: transform .08s;
+        }
+        .orb:active { transform: scale(.92); }
+        .count {
+            min-width: 64px; text-align: center; padding: 6px 0; border-radius: 10px; background: var(--lcd-bg);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, .9), 0 0 0 1px #2b3a2f;
+            font-weight: 800; font-size: 26px; color: var(--lcd-on); text-shadow: 0 0 8px rgba(157, 255, 60, .85);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Глянцеві Aero-кнопки */
+        .buy {
+            position: relative; overflow: hidden; width: 100%; padding: 16px; border: none; border-radius: 999px; cursor: pointer;
+            font: 900 italic 18px/1 'Exo 2', sans-serif; letter-spacing: .12em; text-transform: uppercase;
+            color: #0d1a00; text-shadow: 0 1px 0 rgba(255, 255, 255, .5);
+            background: linear-gradient(180deg, #ecff7a 0%, var(--lime) 48%, var(--lime-deep) 100%);
+            box-shadow: inset 0 -4px 10px rgba(0, 60, 0, .45), 0 0 0 2px #2f5200, 0 6px 18px rgba(157, 255, 60, .35);
+            transition: transform .08s, filter .15s;
+        }
+        .buy::before {
+            content: ''; position: absolute; left: 6%; right: 6%; top: 3px; height: 46%; border-radius: 999px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, .85), rgba(255, 255, 255, .05));
+        }
+        .buy span { position: relative; }
+        .buy:active { transform: scale(.97); filter: brightness(1.1); }
+        .vip .buy {
+            color: #f2f6ff; text-shadow: 0 1px 2px rgba(0, 0, 40, .7);
+            background: linear-gradient(180deg, #7ea2ff 0%, var(--blue) 50%, var(--blue-deep) 100%);
+            box-shadow: inset 0 -4px 10px rgba(0, 0, 60, .5), 0 0 0 2px #0a1f66, 0 6px 18px rgba(50, 100, 255, .45);
+        }
+
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation: none !important; }
+        }
     </style>
 </head>
 <body>
-    <div class="header"><h1>🎮 Dristic-con</h1><p>Оберіть квитки</p></div>
-    <div id="test-banner" style="display:none; background:#3a2f00; color:#ffd54a; border:1px solid #ffd54a; border-radius:12px; padding:10px 14px; margin-bottom:16px; width:100%; max-width:350px; text-align:center; font-weight:700;">🧪 ТЕСТОВИЙ РЕЖИМ — не йде в статистику</div>
-
-    <div class="ticket-card">
-        <div style="display:flex; justify-content: space-between; align-items:center;">
-            <h3>Класичний</h3><div class="price">300 ₴</div>
-        </div>
-        <div class="counter">
-            <button class="count-btn" onclick="change(1, -1)">-</button>
-            <span class="count-val" id="cnt1">1</span>
-            <button class="count-btn" onclick="change(1, 1)">+</button>
-        </div>
-        <button class="btn btn-base" onclick="send(1, 'Класичний')">Купити</button>
+    <div class="backdrop" aria-hidden="true">
+        <div class="ribbon r1"></div>
+        <div class="ribbon r2"></div>
+        <img class="bubble far" src="img/b-fly.webp"    style="width:70px; top:3%;  left:4%;  animation-duration:9s" alt="">
+        <img class="bubble"     src="img/b-mask.webp"   style="width:78px; top:24%; right:-14px; animation-duration:8s; animation-delay:-2s" alt="">
+        <img class="bubble far" src="img/b-orb.webp"    style="width:26px; top:30%; left:10%; animation-duration:6s" alt="">
+        <img class="bubble"     src="img/b-star.webp"   style="width:72px; top:52%; left:-18px; animation-duration:7.5s; animation-delay:-4s" alt="">
+        <img class="bubble far" src="img/b-leaf.webp"   style="width:64px; top:74%; right:2%; animation-duration:10s; animation-delay:-1s" alt="">
+        <img class="bubble far" src="img/b-cactus.webp" style="width:70px; top:90%; left:22%; animation-duration:8.5s; animation-delay:-3s" alt="">
+        <img class="bubble far" src="img/b-orb.webp"    style="width:18px; top:66%; right:24%; animation-duration:5s; animation-delay:-2s" alt="">
     </div>
 
-    <div class="ticket-card">
-        <div style="display:flex; justify-content: space-between; align-items:center;">
-            <h3>Виступаючий</h3><div class="price">250 ₴</div>
-        </div>
-        <p class="desc">Для тих, хто пройшов відбір.</p>
-        <div class="counter">
-            <button class="count-btn" onclick="change(2, -1)">-</button>
-            <span class="count-val" id="cnt2">1</span>
-            <button class="count-btn" onclick="change(2, 1)">+</button>
-        </div>
-        <button class="btn btn-vip" onclick="send(2, 'Для виступаючих')">Купити</button>
-    </div>
+    <main>
+        <img class="logo" src="img/logo.webp" alt="Dristic-con">
+
+        <div class="lcd"><span class="eq"><i></i><i></i><i></i><i></i></span>Оберіть квитки</div>
+        <div id="test-banner">🧪 ТЕСТОВИЙ РЕЖИМ — не йде в статистику</div>
+
+        <section class="card">
+            <img class="mascot" src="img/hero.webp" alt="">
+            <div class="card-in">
+                <div class="row">
+                    <h2>Класичний</h2>
+                    <div class="price">300 ₴</div>
+                </div>
+                <div class="counter">
+                    <button class="orb" onclick="change(1, -1)" aria-label="Менше">−</button>
+                    <span class="count" id="cnt1">1</span>
+                    <button class="orb" onclick="change(1, 1)" aria-label="Більше">+</button>
+                </div>
+                <button class="buy" onclick="send(1, 'Класичний')"><span>Купити</span></button>
+            </div>
+        </section>
+
+        <section class="card vip">
+            <div class="card-in">
+                <div class="row">
+                    <div>
+                        <h2>Виступаючий</h2>
+                        <div class="tag">Для тих, хто пройшов відбір.</div>
+                    </div>
+                    <div class="price">250 ₴</div>
+                </div>
+                <div class="counter">
+                    <button class="orb" onclick="change(2, -1)" aria-label="Менше">−</button>
+                    <span class="count" id="cnt2">1</span>
+                    <button class="orb" onclick="change(2, 1)" aria-label="Більше">+</button>
+                </div>
+                <button class="buy" onclick="send(2, 'Для виступаючих')"><span>Купити</span></button>
+            </div>
+        </section>
+    </main>
 
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
+        try { tg.setHeaderColor('#040706'); tg.setBackgroundColor('#040706'); } catch (e) {}
         const isTest = new URLSearchParams(location.search).get('test') === '1';
         if (isTest) document.getElementById('test-banner').style.display = 'block';
         let counts = { 1: 1, 2: 1 };
         function change(id, delta) {
             counts[id] = Math.max(1, Math.min(10, counts[id] + delta));
             document.getElementById('cnt' + id).innerText = counts[id];
+            try { tg.HapticFeedback.selectionChanged(); } catch (e) {}
         }
         function send(id, name) {
             const payload = { ticket: name, count: counts[id] };

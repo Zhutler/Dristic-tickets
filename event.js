@@ -11,6 +11,6 @@ module.exports = {
     },
     // Адміни при першому запуску (далі список живе в admins.json і змінюється з бота).
     defaultAdminIds: ['789355423'],
-    appUrl: 'https://zhutler.github.io/Dristic-tickets/app.html?v=3',
+    appUrl: 'https://zhutler.github.io/Dristic-tickets/app.html?v=4',
     scannerUrl: 'https://zhutler.github.io/Dristic-tickets/scanner.html?v=1'
 };
